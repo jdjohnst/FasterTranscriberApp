@@ -15,7 +15,8 @@ chmod +x install.sh
 ./install.sh
 ```
 
-This will automatically download the codebase, configure Python, install all background dependencies, and place a launch icon on your Desktop.
+This will automatically download the codebase, configure Python, install all background dependencies, and place a launch icon on your Desktop. 
+Launching the app for the first time will likely be delayed by a few seconds. Wait for at least 15 seconds before clicking again. You may have to search among open windows.
 
 ## System Requirements
 
