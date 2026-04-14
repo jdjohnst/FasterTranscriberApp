@@ -62,7 +62,7 @@ This will automatically download the codebase, configure Python, install all bac
 To completely remove the application and its background components from your system, open your terminal, navigate to the directory where you originally installed the app, and run the uninstallation script:
 
 ```bash
-cd FasterTranscriberApp
+cd FasterTranscriber
 ./uninstall.sh
 ```
 
