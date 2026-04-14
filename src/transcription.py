@@ -22,8 +22,8 @@ SUMMARY_PROMPTS = {
         "combine": "1. Lecture Topic Overview (1-2 sentences)\n2. Detailed Course Notes (use nested bullet points heavily; capture specific facts, dates, principles, or formulas)\n3. Key Vocabulary & Definitions\n4. Main Conclusions or 'Exam' Takeaways"
     },
     "Meeting / Group Discussion": {
-        "chunk": "Act as a meticulous meeting secretary and historical record keeper. Extract all core tensions, diverse perspectives, dissenting opinions, finalized decisions, and specific action items (with owner and deadline). Capture nuanced details of the consensus-building process.",
-        "combine": "Generate a structured summary that balances formal outcomes with the underlying nuances of sensitive deliberations. Prioritize a neutral, 'historical record' style.\n1. Meeting Overview (capture the consensus-building process)\n2. Agenda Items Analysis (synthesize core tensions, diverse perspectives, and dissenting opinions for each topic)\n3. Finalized Decisions & Rationales\n4. Commitments: [Owner] | [Actionable Deliverable] | [Deadline]"
+        "chunk": "Act as a meticulous meeting secretary and record keeper. Extract all core ideas, concerns, tensions, diverse perspectives, dissenting opinions, finalized decisions, and specific action items (with owner and deadline). Capture nuanced details of the conversation and process.",
+        "combine": "Generate a structured summary that balances formal outcomes with the underlying nuances of sensitive deliberations. Prioritize a neutral, 'historical record' style.\n1. Meeting Overview (capture the consensus-building process)\n2. Agenda Items Analysis (synthesize core ideas, concerns, tensions, diverse perspectives, and dissenting opinions for each topic)\n3. Finalized Decisions & Rationales\n4. Commitments: [Owner] | [Actionable Deliverable] | [Deadline]"
     },
     "Interview / Conversation": {
         "chunk": "Provide a concise, bulleted breakdown of the core subject, perspectives or stances mentioned, and any specific quotes or insights.",
