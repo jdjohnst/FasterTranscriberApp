@@ -3,7 +3,7 @@
 exec > >(tee install_log.txt) 2>&1
 
 echo "=========================================="
-echo " FasterTranscriberApp V2 Installer"
+echo " FasterTranscriber Installer"
 echo "=========================================="
 
 # 1. Capture absolute path of the directory before sourcing profiles
@@ -51,7 +51,7 @@ echo "Installing application dependencies..."
 uv pip install -r requirements.txt
 
 # 7. Create Desktop Launcher (.app)
-LAUNCHER_APP=~/Desktop/TranscriberV2.app
+LAUNCHER_APP=~/Desktop/FasterTranscriber.app
 echo "Creating native desktop app at $LAUNCHER_APP..."
 
 # We create an internal bash runner first
@@ -66,7 +66,18 @@ chmod +x "run_app.sh"
 # Then compile an AppleScript that executes it silently
 osacompile -e 'do shell script "'"$APP_DIR"'/run_app.sh > /dev/null 2>&1 &"' -o "$LAUNCHER_APP"
 
+# Apply a generic Application/Microphone icon to the app wrapper instead of the AppleScript scroll icon
+ICON_SRC="/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericApplicationIcon.icns"
+ICON_DEST="$LAUNCHER_APP/Contents/Resources/applet.icns"
+if [ -f "$ICON_SRC" ]; then
+    cp "$ICON_SRC" "$ICON_DEST"
+    touch "$LAUNCHER_APP" # Force macOS finder refresh
+fi
+
+# Clean up older versions of shortcuts
+rm -f ~/Desktop/TranscriberV2.command 2>/dev/null
+
 echo "=========================================="
 echo " Installation Complete!"
-echo " Double-click TranscriberV2.app on your desktop to run the app silently."
+echo " Double-click FasterTranscriber.app on your desktop to run the app silently."
 echo "=========================================="

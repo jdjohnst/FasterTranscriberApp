@@ -22,8 +22,8 @@ SUMMARY_PROMPTS = {
         "combine": "1. Lecture Topic Overview (1-2 sentences)\n2. Detailed Course Notes (use nested bullet points heavily; capture specific facts, dates, principles, or formulas)\n3. Key Vocabulary & Definitions\n4. Main Conclusions or 'Exam' Takeaways"
     },
     "Meeting / Group Discussion": {
-        "chunk": "Act as a meticulous meeting secretary. Extract all distinct discussion topics, final decisions, unresolved parked items, and specific tasks/action items mentioned in this section.",
-        "combine": "1. Meeting Overview (2-3 sentences max)\n2. Detailed Discussion Recap (bullet out what was specifically discussed, grouped by topic)\n3. Conclusions & Key Decisions\n4. Unresolved Topics / Things to Come Back To\n5. Action Items (Tasks to be done, including owners if mentioned)"
+        "chunk": "Act as a meticulous meeting secretary and record keeper. Extract all core ideas, concerns, tensions, diverse perspectives, dissenting opinions, finalized decisions, and specific action items (with owner and deadline). Capture nuanced details of the conversation and process.",
+        "combine": "Generate a structured summary that balances formal outcomes with the underlying nuances of sensitive deliberations. Prioritize a neutral, 'historical record' style.\n1. Meeting Overview (capture the consensus-building process)\n2. Agenda Items Analysis (synthesize core ideas, concerns, tensions, diverse perspectives, and dissenting opinions for each topic)\n3. Finalized Decisions & Rationales\n4. Commitments: [Owner] | [Actionable Deliverable] | [Deadline]"
     },
     "Interview / Conversation": {
         "chunk": "Provide a concise, bulleted breakdown of the core subject, perspectives or stances mentioned, and any specific quotes or insights.",
@@ -67,8 +67,9 @@ def check_ollama_running(stop_event=None):
     return False
 
 class TranscriptionEngine:
-    def __init__(self, callback=None, stop_event=None):
+    def __init__(self, callback=None, stop_event=None, live_text_callback=None):
         self.callback = callback or (lambda msg, pct=None: None)
+        self.live_text_callback = live_text_callback or (lambda text: None)
         self.stop_event = stop_event or threading.Event()
 
     def _convert_to_wav(self, audio_file):
@@ -113,6 +114,7 @@ class TranscriptionEngine:
                 logger.info("Transcription cancelled by user.")
                 return None
             segments.append(segment.text)
+            self.live_text_callback(segment.text)
             # Update progress dynamically based on segment time vs total time
             pct = 15 + int((segment.end / info.duration) * 35)
             self.callback(f"Transcribing audio... {int(segment.end)}s / {int(info.duration)}s", min(pct, 50))
@@ -177,7 +179,8 @@ class TranscriptionEngine:
             raise RuntimeError("Ollama server is not running.")
             
         self.callback("Generating summary...", start_pct + 5)
-        chunks = chunk_text(text, chunk_size=10000)
+        # Optimized chunk size to prevent LLM memory thrashing
+        chunks = chunk_text(text, chunk_size=3000)
         prompt_config = SUMMARY_PROMPTS.get(summary_type, SUMMARY_PROMPTS["General"])
         
         if len(chunks) == 1:
@@ -188,7 +191,7 @@ class TranscriptionEngine:
             )
             response = requests.post(
                 f"{OLLAMA_HOST}/api/generate",
-                json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False, "options": {"num_ctx": 16384, "temperature": 0.4}},
+                json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False, "options": {"num_ctx": 8192, "temperature": 0.4}},
                 timeout=600
             )
             response.raise_for_status()
@@ -210,7 +213,7 @@ class TranscriptionEngine:
                 )
                 resp = requests.post(
                     f"{OLLAMA_HOST}/api/generate",
-                    json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False, "options": {"num_ctx": 16384, "temperature": 0.3}},
+                    json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False, "options": {"num_ctx": 8192, "temperature": 0.3}},
                     timeout=600
                 )
                 resp.raise_for_status()
@@ -228,7 +231,7 @@ class TranscriptionEngine:
             
             resp = requests.post(
                 f"{OLLAMA_HOST}/api/generate",
-                json={"model": OLLAMA_MODEL, "prompt": final_prompt, "stream": False, "options": {"num_ctx": 16384, "temperature": 0.4}},
+                json={"model": OLLAMA_MODEL, "prompt": final_prompt, "stream": False, "options": {"num_ctx": 8192, "temperature": 0.4}},
                 timeout=600
             )
             resp.raise_for_status()

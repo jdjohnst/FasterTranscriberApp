@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "Uninstalling FasterTranscriberApp V2..."
+echo "Uninstalling FasterTranscriber..."
 
 echo "Stopping background processes..."
 pkill -f "src/main.py" 2>/dev/null
@@ -10,7 +10,7 @@ rm -rf .venv
 rm -f run_app.sh
 
 echo "Removing desktop launcher..."
-rm -rf ~/Desktop/TranscriberV2.app
+rm -rf ~/Desktop/FasterTranscriber.app
 
 echo "Removing debug logs..."
 rm -f src/debug.log

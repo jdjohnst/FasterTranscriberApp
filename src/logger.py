@@ -6,7 +6,7 @@ def setup_logger(log_file="debug.log"):
     Configure a centralized logger to track application events and errors implicitly.
     Output will be sent sequentially to the debug.log file.
     """
-    logger = logging.getLogger("FasterTranscriberApp")
+    logger = logging.getLogger("FasterTranscriber")
     logger.setLevel(logging.DEBUG)
 
     # Disable propagating to standard output / root logger to keep stdout cleaner

@@ -16,8 +16,8 @@ class TranscriptionApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("FasterTranscriberApp V2")
-        self.geometry("550x650")
+        self.title("FasterTranscriber")
+        self.geometry("550x800")
         self.resizable(False, False)
 
         # Background operation tracking
@@ -91,6 +91,10 @@ class TranscriptionApp(ctk.CTk):
 
         self.status_label = ctk.CTkLabel(self, text="Ready", text_color="gray")
         self.status_label.pack()
+        
+        # Live Transcript Feed
+        self.live_feed_box = ctk.CTkTextbox(self, height=120, width=450, state="disabled", wrap="word")
+        self.live_feed_box.pack(pady=(5, 15))
 
     def browse_file(self):
         file_types = [("Audio Files", "*.mp3 *.wav *.m4a *.aac *.flac *.ogg *.mp4 *.mov")]
@@ -127,6 +131,14 @@ class TranscriptionApp(ctk.CTk):
             self.update_idletasks()
         self.after(0, _update)
 
+    def append_live_text(self, text):
+        def _update():
+            self.live_feed_box.configure(state="normal")
+            self.live_feed_box.insert("end", text + " ")
+            self.live_feed_box.see("end")
+            self.live_feed_box.configure(state="disabled")
+        self.after(0, _update)
+
     def start_processing(self):
         audio_file = self.selected_file.get()
         model_name = self.model_var.get()
@@ -146,6 +158,10 @@ class TranscriptionApp(ctk.CTk):
         self.stop_event.clear()
         self.toggle_ui(True)
         self.update_progress("Starting engine...", 0)
+        
+        self.live_feed_box.configure(state="normal")
+        self.live_feed_box.delete("1.0", "end")
+        self.live_feed_box.configure(state="disabled")
 
         # Start thread
         self.active_thread = threading.Thread(
@@ -164,7 +180,11 @@ class TranscriptionApp(ctk.CTk):
 
     def processing_worker(self, audio_file, model_name, operation, summary_type):
         try:
-            engine = TranscriptionEngine(callback=self.update_progress, stop_event=self.stop_event)
+            engine = TranscriptionEngine(
+                callback=self.update_progress, 
+                stop_event=self.stop_event,
+                live_text_callback=self.append_live_text
+            )
             
             # Phase 1: Transcribe
             full_text = engine.run_transcription(audio_file, model_name)
