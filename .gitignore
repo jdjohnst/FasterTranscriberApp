@@ -26,3 +26,6 @@ Icon
 # Temporary files
 *.swp
 *~
+
+# Dynamic runner scripts
+run_app.sh

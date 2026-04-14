@@ -56,3 +56,14 @@ This will automatically download the codebase, configure Python, install all bac
   The backend logic will automatically boot the Ollama daemon. If it fails, open Terminal and type `ollama serve` to start the server manually.
 - **Audio file not showing up in the dropdown:**  
   Move your file into the Downloads folder and ensure it is in a supported format (`.mp3`, `.wav`, `.m4a`, `.mp4`, `.mov`, etc.).
+
+## Uninstallation
+
+To completely remove the application and its background components from your system, open your terminal, navigate to the directory where you originally installed the app, and run the uninstallation script:
+
+```bash
+cd FasterTranscriberApp
+./uninstall.sh
+```
+
+This will automatically stop any running transcriber background processes, remove the isolated Python environment, delete the Desktop launcher, and give you the option to completely uninstall the Ollama service. Once the script finishes, you can safely delete the cloned repository directory.
