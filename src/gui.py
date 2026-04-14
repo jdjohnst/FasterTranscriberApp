@@ -1,5 +1,4 @@
 import os
-import sys
 import threading
 import subprocess
 import customtkinter as ctk
@@ -212,7 +211,7 @@ class TranscriptionApp(ctk.CTk):
 
         except Exception as e:
             logger.error(f"Processing error: {e}", exc_info=True)
-            self.after(0, lambda: messagebox.showerror("Error", f"An error occurred:\n{e}\n\nCheck debug.log for details."))
+            self.after(0, lambda err=str(e): messagebox.showerror("Error", f"An error occurred:\n{err}\n\nCheck debug.log for details."))
             self.on_process_end("Error")
 
     def on_process_end(self, result_msg, open_path=None):
