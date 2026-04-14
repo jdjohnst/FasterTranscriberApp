@@ -66,6 +66,17 @@ chmod +x "run_app.sh"
 # Then compile an AppleScript that executes it silently
 osacompile -e 'do shell script "'"$APP_DIR"'/run_app.sh > /dev/null 2>&1 &"' -o "$LAUNCHER_APP"
 
+# Apply a generic Application/Microphone icon to the app wrapper instead of the AppleScript scroll icon
+ICON_SRC="/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericApplicationIcon.icns"
+ICON_DEST="$LAUNCHER_APP/Contents/Resources/applet.icns"
+if [ -f "$ICON_SRC" ]; then
+    cp "$ICON_SRC" "$ICON_DEST"
+    touch "$LAUNCHER_APP" # Force macOS finder refresh
+fi
+
+# Clean up older versions of shortcuts
+rm -f ~/Desktop/TranscriberV2.command 2>/dev/null
+
 echo "=========================================="
 echo " Installation Complete!"
 echo " Double-click TranscriberV2.app on your desktop to run the app silently."
