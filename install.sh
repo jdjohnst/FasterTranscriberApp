@@ -3,7 +3,7 @@
 exec > >(tee install_log.txt) 2>&1
 
 echo "=========================================="
-echo " FasterTranscriberApp V2 Installer"
+echo " FasterTranscriber Installer"
 echo "=========================================="
 
 # 1. Capture absolute path of the directory before sourcing profiles
@@ -51,7 +51,7 @@ echo "Installing application dependencies..."
 uv pip install -r requirements.txt
 
 # 7. Create Desktop Launcher (.app)
-LAUNCHER_APP=~/Desktop/TranscriberV2.app
+LAUNCHER_APP=~/Desktop/FasterTranscriber.app
 echo "Creating native desktop app at $LAUNCHER_APP..."
 
 # We create an internal bash runner first
@@ -79,5 +79,5 @@ rm -f ~/Desktop/TranscriberV2.command 2>/dev/null
 
 echo "=========================================="
 echo " Installation Complete!"
-echo " Double-click TranscriberV2.app on your desktop to run the app silently."
+echo " Double-click FasterTranscriber.app on your desktop to run the app silently."
 echo "=========================================="

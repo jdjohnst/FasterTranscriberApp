@@ -16,7 +16,7 @@ class TranscriptionApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("FasterTranscriberApp V2")
+        self.title("FasterTranscriber")
         self.geometry("550x800")
         self.resizable(False, False)
 
