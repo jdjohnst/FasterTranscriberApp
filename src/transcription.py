@@ -97,7 +97,9 @@ class TranscriptionEngine:
         
         if self.stop_event.is_set(): return None
 
-        model = WhisperModel(model_size, compute_type="default")
+        # Apple Silicon optimization: int8 quantization significantly reduces RAM footprint
+        # and typically increases CPU inference speed without noticeable accuracy loss.
+        model = WhisperModel(model_size, compute_type="int8")
         safe_audio = self._convert_to_wav(audio_file)
         
         if self.stop_event.is_set(): return None

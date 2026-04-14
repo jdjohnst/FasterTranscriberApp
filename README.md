@@ -16,8 +16,8 @@ FasterTranscriberApp is a simple, self-contained audio transcription assistant d
 To install FasterTranscriberApp on a new Mac, simply open **Terminal** (`Cmd + Space` -> "Terminal") and paste the following block of code:
 
 ```bash
-git clone https://github.com/jdjohnst/FasterTranscriberApp_1.git
-cd FasterTranscriberApp_1
+git clone https://github.com/jdjohnst/FasterTranscriberApp.git
+cd FasterTranscriberApp
 chmod +x install.sh
 ./install.sh
 ```
