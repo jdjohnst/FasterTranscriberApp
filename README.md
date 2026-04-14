@@ -1,4 +1,4 @@
-# FasterTranscriberApp V2
+# FasterTranscriberApp (V2)
 
 A comprehensive, local-only transcriber utilizing Faster Whisper and Ollama with a multithreading GUI via CustomTkinter.
 
