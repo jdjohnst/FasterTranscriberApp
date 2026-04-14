@@ -11,11 +11,18 @@ FasterTranscriberApp is a simple, self-contained audio transcription assistant d
 - **Safety Checks:** Inspects RAM limits dynamically using `psutil` to prevent overheating and freezing.
 - **Easy Installation:** Bootstraps with standard Python tools via `uv` instead of brittle terminal hacks.
 
-## Commands
+## Installation
 
-- **Install**: `./install.sh`
-- **Uninstall**: `./uninstall.sh`
-- **Launch GUI manually**: `python src/main.py`
+To install FasterTranscriberApp on a new Mac, simply open **Terminal** (`Cmd + Space` -> "Terminal") and paste the following block of code:
+
+```bash
+git clone https://github.com/jdjohnst/FasterTranscriberApp_1.git
+cd FasterTranscriberApp_1
+chmod +x install.sh
+./install.sh
+```
+
+This will automatically download the codebase, configure Python, install all background dependencies, and place a launch icon on your Desktop.
 
 ## System Requirements
 
