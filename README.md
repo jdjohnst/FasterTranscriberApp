@@ -32,8 +32,8 @@ Launching the app for the first time will likely be delayed by a few seconds. Wa
    - Larger Whisper models (like `large`) provide the most accurate transcriptions but require more memory and run slower.  
    - Smaller models (`base`, `small`) are faster and use less memory but may be less accurate. 
 3. Choose your Operation Mode:  
-   - **Format Transcript**: Outputs a readable script identifying speaker changes.  
-   - **Summarize Raw Transcript (Fast Mode)**: Bypasses speaker-labeling entirely and instantly summarizes the raw data.  
+   - **Format Transcript**: Outputs a readable script with appropriate syntax and punctuation. Speaker changes are hard to detect but it does a decent job.  
+   - **Summarize Raw Transcript (Fast Mode)**: Bypasses formatting entirely and instantly summarizes the raw transcription. No accuracy is lost by skipping formatting.  
    - **Format & Summarize**: Performs both actions (very resource and time intensive).  
    *(If asking for a summary, you can select the Summary Context to dictate exactly how the AI takes notes)*
 4. Click **Start Transcription**. The GUI progress bar will dynamically track segments.
@@ -48,8 +48,6 @@ Launching the app for the first time will likely be delayed by a few seconds. Wa
   This usually means Faster-Whisper failed to load or run. Check `debug.log` to see if your system ran out of RAM, or try using the `base` model.
 - **Ollama says it’s not running:**  
   The backend logic will automatically boot the Ollama daemon. If it fails, open Terminal and type `ollama serve` to start the server manually.
-- **Audio file not showing up in the dropdown:**  
-  Move your file into the Downloads folder and ensure it is in a supported format (`.mp3`, `.wav`, `.m4a`, `.mp4`, `.mov`, etc.).
 
 ## Uninstallation
 
