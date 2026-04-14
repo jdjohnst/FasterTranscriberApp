@@ -31,15 +31,7 @@ SUMMARY_PROMPTS = {
     }
 }
 
-def list_downloads_files():
-    """List audio files in the user's Downloads directory."""
-    downloads_folder = os.path.expanduser("~/Downloads")
-    files = sorted(
-        glob.glob(os.path.join(downloads_folder, "*")),
-        key=os.path.getmtime,
-        reverse=True
-    )
-    return [f for f in files if f.lower().endswith((".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".mp4", ".mov"))]
+
 
 def chunk_text(text, chunk_size=CHUNK_SIZE):
     """Split transcript text into chunks of roughly chunk_size words."""
@@ -84,7 +76,7 @@ class TranscriptionEngine:
         self.callback("Pre-processing media file with FFmpeg...", 0)
         logger.info(f"FFmpeg preprocessing: {audio_file}")
         
-        temp_dir = os.path.expanduser("~/Downloads")
+        temp_dir = os.path.dirname(os.path.abspath(audio_file))
         base_name = os.path.splitext(os.path.basename(audio_file))[0]
         temp_wav = os.path.join(temp_dir, f".{base_name}_temp_conv.wav")
         
@@ -242,8 +234,8 @@ class TranscriptionEngine:
 
     def save_output(self, content, audio_file, suffix):
         """Save text output to downloads."""
+        out_dir = os.path.dirname(os.path.abspath(audio_file))
         base_name = os.path.splitext(os.path.basename(audio_file))[0]
-        out_dir = os.path.expanduser("~/Downloads")
         out_file = os.path.join(out_dir, base_name + suffix)
         with open(out_file, "w", encoding="utf-8") as f:
             f.write(content)

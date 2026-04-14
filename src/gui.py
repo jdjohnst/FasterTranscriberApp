@@ -6,7 +6,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 from src.logger import logger
 from src.system_checks import check_hardware_safety
-from src.transcription import list_downloads_files, TranscriptionEngine
+from src.transcription import TranscriptionEngine
 
 # Setup Modern Dark/Light theme
 ctk.set_appearance_mode("System")
@@ -25,8 +25,7 @@ class TranscriptionApp(ctk.CTk):
         self.stop_event = threading.Event()
 
         # UI Data Variables
-        self.audio_files = list_downloads_files()
-        self.selected_file = ctk.StringVar(value=self.audio_files[0] if self.audio_files else "")
+        self.selected_file = ctk.StringVar(value="")
         self.model_var = ctk.StringVar(value="base")
         self.operation_var = ctk.StringVar(value="format_only")
         self.summary_type_var = ctk.StringVar(value="General")
@@ -41,9 +40,13 @@ class TranscriptionApp(ctk.CTk):
         # Audio File Selection
         file_frame = ctk.CTkFrame(self)
         file_frame.pack(fill="x", padx=30, pady=10)
-        ctk.CTkLabel(file_frame, text="1. Select Audio from Downloads:", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
-        self.file_combo = ctk.CTkComboBox(file_frame, values=self.audio_files, variable=self.selected_file, width=450)
-        self.file_combo.pack(padx=10, pady=(0, 10))
+        ctk.CTkLabel(file_frame, text="1. Select Audio File:", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
+        
+        self.browse_btn = ctk.CTkButton(file_frame, text="Browse...", command=self.browse_file, width=120)
+        self.browse_btn.pack(side="left", padx=10, pady=(0, 10))
+        
+        self.file_label = ctk.CTkLabel(file_frame, textvariable=self.selected_file, text_color="gray", width=300, anchor="w")
+        self.file_label.pack(side="left", fill="x", expand=True, padx=10, pady=(0, 10))
 
         # Model Selection
         model_frame = ctk.CTkFrame(self)
@@ -89,6 +92,12 @@ class TranscriptionApp(ctk.CTk):
         self.status_label = ctk.CTkLabel(self, text="Ready", text_color="gray")
         self.status_label.pack()
 
+    def browse_file(self):
+        file_types = [("Audio Files", "*.mp3 *.wav *.m4a *.aac *.flac *.ogg *.mp4 *.mov")]
+        path = ctk.filedialog.askopenfilename(title="Select Audio File", filetypes=file_types)
+        if path:
+            self.selected_file.set(path)
+
     def on_op_change(self):
         op = self.operation_var.get()
         if op == "format_only":
@@ -98,7 +107,7 @@ class TranscriptionApp(ctk.CTk):
 
     def toggle_ui(self, running):
         state = "disabled" if running else "normal"
-        self.file_combo.configure(state=state)
+        self.browse_btn.configure(state=state)
         self.model_combo.configure(state=state)
         self.start_btn.configure(state=state)
         self.cancel_btn.configure(state="normal" if running else "disabled")
@@ -190,7 +199,7 @@ class TranscriptionApp(ctk.CTk):
         def _update():
             self.toggle_ui(False)
             if result_msg == "Success":
-                self.update_progress("Completed successfully! Files saved to Downloads.", 100)
+                self.update_progress("Completed successfully!", 100)
                 if open_path and os.path.exists(open_path):
                     subprocess.run(["open", os.path.dirname(open_path)])
             elif result_msg == "Error":

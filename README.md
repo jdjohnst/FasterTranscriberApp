@@ -33,7 +33,7 @@ This will automatically download the codebase, configure Python, install all bac
 
 ## App Usage
 
-1. Double-click the `TranscriberV2.command` shortcut on your Desktop to launch the utility.
+1. Double-click the `TranscriberV2.app` shortcut on your Desktop to launch the utility.
 2. In the app window, choose an audio file from your Downloads folder and select a Whisper model:  
    - Larger Whisper models (like `large`) provide the most accurate transcriptions but require more memory and run slower.  
    - Smaller models (`base`, `small`) are faster and use less memory but may be less accurate. 

@@ -50,20 +50,23 @@ uv venv --python 3.11 .venv
 echo "Installing application dependencies..."
 uv pip install -r requirements.txt
 
-# 7. Create Desktop Launcher
-LAUNCHER_PATH=~/Desktop/TranscriberV2.command
-echo "Creating desktop shortcut at $LAUNCHER_PATH..."
+# 7. Create Desktop Launcher (.app)
+LAUNCHER_APP=~/Desktop/TranscriberV2.app
+echo "Creating native desktop app at $LAUNCHER_APP..."
 
-cat <<EOF > "$LAUNCHER_PATH"
+# We create an internal bash runner first
+cat <<EOF > "run_app.sh"
 #!/bin/bash
-cd "$(pwd)"
+cd "$APP_DIR"
 source .venv/bin/activate
 python src/main.py
 EOF
+chmod +x "run_app.sh"
 
-chmod +x "$LAUNCHER_PATH"
+# Then compile an AppleScript that executes it silently
+osacompile -e 'do shell script "'"$APP_DIR"'/run_app.sh > /dev/null 2>&1 &"' -o "$LAUNCHER_APP"
 
 echo "=========================================="
 echo " Installation Complete!"
-echo " Double-click TranscriberV2.command on your desktop to run the app."
+echo " Double-click TranscriberV2.app on your desktop to run the app silently."
 echo "=========================================="
