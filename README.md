@@ -4,20 +4,13 @@ A comprehensive, local-only transcriber utilizing Faster Whisper and Ollama with
 
 FasterTranscriber is a simple, self-contained audio transcription assistant designed for macOS (M1 or newer recommended). It transcribes audio interviews using the OpenAI Whisper model (via Faster-Whisper), then formats and/or summarizes the transcript using LLaMA 3.2 via Ollama. All processing happens entirely on your computer, meaning that no internet or cloud services are used after installation. Your data never leaves your device, making the process as secure as your Mac itself.
 
-## Architecture Improvements from V1
-
-- **Multithreading:** Inference executes concurrently so the UI never crashes or lags.
-- **Modularity:** Isolated components (UI, logging, tasks) to standard software engineering patterns.
-- **Safety Checks:** Inspects RAM limits dynamically using `psutil` to prevent overheating and freezing.
-- **Easy Installation:** Bootstraps with standard Python tools via `uv` instead of brittle terminal hacks.
-
 ## Installation
 
 To install FasterTranscriber on a new Mac, simply open **Terminal** (`Cmd + Space` -> "Terminal") and paste the following block of code:
 
 ```bash
-git clone https://github.com/jdjohnst/FasterTranscriberApp.git
-cd FasterTranscriberApp
+git clone https://github.com/jdjohnst/FasterTranscriber.git
+cd FasterTranscriber
 chmod +x install.sh
 ./install.sh
 ```
@@ -33,7 +26,7 @@ This will automatically download the codebase, configure Python, install all bac
 
 ## App Usage
 
-1. Double-click the `TranscriberV2.app` shortcut on your Desktop to launch the utility.
+1. Double-click the `FasterTranscriber.app` shortcut on your Desktop to launch the utility.
 2. In the app window, choose an audio file from your Downloads folder and select a Whisper model:  
    - Larger Whisper models (like `large`) provide the most accurate transcriptions but require more memory and run slower.  
    - Smaller models (`base`, `small`) are faster and use less memory but may be less accurate. 
