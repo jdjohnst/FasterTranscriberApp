@@ -30,8 +30,7 @@ brew install ffmpeg --quiet
 if ! command -v ollama &>/dev/null; then
   brew install ollama --quiet
 fi
-echo "Pulling llama3.2 model for summarization..."
-ollama pull llama3.2
+
 
 # 5. Check for uv (lightning-fast python package manager)
 if ! command -v uv &>/dev/null; then

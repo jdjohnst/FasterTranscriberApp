@@ -1,4 +1,4 @@
 #!/bin/bash
-cd "/Users/jdjohnst/Desktop/scripts/Transcriber/FasterTranscriberApp_V2"
+cd "/Users/jdjohnst/FasterTranscriber"
 source .venv/bin/activate
 python src/main.py

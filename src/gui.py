@@ -1,11 +1,13 @@
 import os
 import threading
 import subprocess
+import json
+import requests
 import customtkinter as ctk
 from tkinter import messagebox
 from src.logger import logger
 from src.system_checks import check_hardware_safety
-from src.transcription import TranscriptionEngine
+from src.transcription import TranscriptionEngine, get_installed_ollama_models, check_ollama_running, OLLAMA_HOST
 
 # Setup Modern Dark/Light theme
 ctk.set_appearance_mode("System")
@@ -16,7 +18,7 @@ class TranscriptionApp(ctk.CTk):
         super().__init__()
 
         self.title("FasterTranscriber")
-        self.geometry("550x800")
+        self.geometry("550x850")
         self.resizable(False, False)
 
         # Background operation tracking
@@ -26,10 +28,12 @@ class TranscriptionApp(ctk.CTk):
         # UI Data Variables
         self.selected_file = ctk.StringVar(value="")
         self.model_var = ctk.StringVar(value="base")
+        self.ollama_model_var = ctk.StringVar(value="")
         self.operation_var = ctk.StringVar(value="format_only")
         self.summary_type_var = ctk.StringVar(value="General")
         
         self.build_ui()
+        self.start_setup_thread()
 
     def build_ui(self):
         # Header
@@ -54,10 +58,17 @@ class TranscriptionApp(ctk.CTk):
         self.model_combo = ctk.CTkComboBox(model_frame, values=["tiny", "base", "small", "medium", "large-v1", "large-v2"], variable=self.model_var, width=200)
         self.model_combo.pack(anchor="w", padx=10, pady=(0, 10))
 
+        # Ollama Model Selection
+        ollama_model_frame = ctk.CTkFrame(self)
+        ollama_model_frame.pack(fill="x", padx=30, pady=10)
+        ctk.CTkLabel(ollama_model_frame, text="3. Choose Ollama Model:", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
+        self.ollama_model_combo = ctk.CTkComboBox(ollama_model_frame, values=["Loading..."], variable=self.ollama_model_var, width=200)
+        self.ollama_model_combo.pack(anchor="w", padx=10, pady=(0, 10))
+
         # Operations
         ops_frame = ctk.CTkFrame(self)
         ops_frame.pack(fill="x", padx=30, pady=10)
-        ctk.CTkLabel(ops_frame, text="3. Select Operations:", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
+        ctk.CTkLabel(ops_frame, text="4. Select Operations:", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=10, pady=(10, 5))
         
         self.radio_format = ctk.CTkRadioButton(ops_frame, text="Format Transcript (Punctuation & Syntax)", variable=self.operation_var, value="format_only", command=self.on_op_change)
         self.radio_format.pack(anchor="w", padx=10, pady=5)
@@ -95,6 +106,68 @@ class TranscriptionApp(ctk.CTk):
         self.live_feed_box = ctk.CTkTextbox(self, height=120, width=450, state="disabled", wrap="word")
         self.live_feed_box.pack(pady=(5, 15))
 
+    def start_setup_thread(self):
+        self.toggle_ui(True)
+        self.update_progress("Initializing Ollama models...", 0)
+        threading.Thread(target=self.setup_worker, daemon=True).start()
+
+    def setup_worker(self):
+        self.update_progress("Checking Ollama server...", 5)
+        if not check_ollama_running():
+            self.update_progress("Failed to start Ollama server.", 0)
+            self.after(0, lambda: self.ollama_model_combo.configure(values=["Error: Ollama not running"]))
+            self.after(0, lambda: self.toggle_ui(False))
+            return
+            
+        required_models = ["llama3.1:8b", "gemma2:9b", "phi4"]
+        installed = get_installed_ollama_models()
+        missing = [m for m in required_models if m not in installed]
+        
+        if missing:
+            for idx, model in enumerate(missing):
+                self.update_progress(f"Downloading required model: {model}...", 10)
+                try:
+                    response = requests.post(
+                        f"{OLLAMA_HOST}/api/pull", 
+                        json={"name": model}, 
+                        stream=True, 
+                        timeout=300
+                    )
+                    response.raise_for_status()
+                    for line in response.iter_lines():
+                        if line:
+                            data = json.loads(line)
+                            status = data.get("status", "")
+                            if "total" in data and "completed" in data:
+                                total = data["total"]
+                                completed = data["completed"]
+                                pct = int((completed / total) * 100)
+                                self.update_progress(f"Pulling {model}... {status}", pct)
+                            else:
+                                self.update_progress(f"Pulling {model}... {status}", 10)
+                except Exception as e:
+                    logger.error(f"Error pulling model {model}: {e}")
+                    self.update_progress(f"Error downloading {model}", 0)
+                    
+        installed = get_installed_ollama_models()
+        
+        def _on_complete():
+            if installed:
+                self.ollama_model_combo.configure(values=installed)
+                # If we have downloaded models, try to set llama3.1:8b or gemma2:9b as default
+                default_model = installed[0]
+                for p in ["llama3.1:8b", "llama3.2"]:
+                    if p in installed:
+                        default_model = p
+                        break
+                self.ollama_model_var.set(default_model)
+            else:
+                self.ollama_model_combo.configure(values=["No models found"])
+            self.toggle_ui(False)
+            self.update_progress("Ready", 0)
+            
+        self.after(0, _on_complete)
+
     def browse_file(self):
         file_types = [("Audio Files", "*.mp3 *.wav *.m4a *.aac *.flac *.ogg *.mp4 *.mov")]
         path = ctk.filedialog.askopenfilename(title="Select Audio File", filetypes=file_types)
@@ -112,6 +185,7 @@ class TranscriptionApp(ctk.CTk):
         state = "disabled" if running else "normal"
         self.browse_btn.configure(state=state)
         self.model_combo.configure(state=state)
+        self.ollama_model_combo.configure(state=state)
         self.start_btn.configure(state=state)
         self.cancel_btn.configure(state="normal" if running else "disabled")
         self.radio_format.configure(state=state)
@@ -141,6 +215,7 @@ class TranscriptionApp(ctk.CTk):
     def start_processing(self):
         audio_file = self.selected_file.get()
         model_name = self.model_var.get()
+        ollama_model = self.ollama_model_var.get()
         operation = self.operation_var.get()
         summary_type = self.summary_type_var.get()
 
@@ -149,7 +224,7 @@ class TranscriptionApp(ctk.CTk):
             return
 
         # Hardware safety check
-        safe, msg = check_hardware_safety(model_name, operation)
+        safe, msg = check_hardware_safety(model_name, ollama_model, operation)
         if not safe:
             if not messagebox.askyesno("Hardware Warning", msg):
                 return
@@ -165,7 +240,7 @@ class TranscriptionApp(ctk.CTk):
         # Start thread
         self.active_thread = threading.Thread(
             target=self.processing_worker,
-            args=(audio_file, model_name, operation, summary_type),
+            args=(audio_file, model_name, ollama_model, operation, summary_type),
             daemon=True
         )
         self.active_thread.start()
@@ -177,12 +252,13 @@ class TranscriptionApp(ctk.CTk):
             self.update_progress("Cancelling...", 0)
             self.cancel_btn.configure(state="disabled")
 
-    def processing_worker(self, audio_file, model_name, operation, summary_type):
+    def processing_worker(self, audio_file, model_name, ollama_model, operation, summary_type):
         try:
             engine = TranscriptionEngine(
                 callback=self.update_progress, 
                 stop_event=self.stop_event,
-                live_text_callback=self.append_live_text
+                live_text_callback=self.append_live_text,
+                ollama_model=ollama_model
             )
             
             # Phase 1: Transcribe
