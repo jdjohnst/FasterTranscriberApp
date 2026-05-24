@@ -9,7 +9,6 @@ from src.logger import logger
 
 CHUNK_SIZE = 250
 OLLAMA_HOST = "http://localhost:11434"
-OLLAMA_MODEL = "llama3.2"
 
 SUMMARY_PROMPTS = {
     "General": {
@@ -65,11 +64,25 @@ def check_ollama_running(stop_event=None):
 
     return False
 
+def get_installed_ollama_models():
+    """Fetch installed Ollama models from the local API."""
+    if not check_ollama_running():
+        return []
+    try:
+        response = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=2)
+        if response.status_code == 200:
+            models = response.json().get("models", [])
+            return [m["name"] for m in models]
+    except Exception as e:
+        logger.error(f"Failed to fetch Ollama models: {e}")
+    return []
+
 class TranscriptionEngine:
-    def __init__(self, callback=None, stop_event=None, live_text_callback=None):
+    def __init__(self, callback=None, stop_event=None, live_text_callback=None, ollama_model=None):
         self.callback = callback or (lambda msg, pct=None: None)
         self.live_text_callback = live_text_callback or (lambda text: None)
         self.stop_event = stop_event or threading.Event()
+        self.ollama_model = ollama_model
 
     def _convert_to_wav(self, audio_file):
         """Safely convert any media file to a 16kHz WAV using FFmpeg."""
@@ -160,7 +173,7 @@ class TranscriptionEngine:
             try:
                 response = requests.post(
                     f"{OLLAMA_HOST}/api/generate",
-                    json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False},
+                    json={"model": self.ollama_model, "prompt": prompt, "stream": False},
                     timeout=120
                 )
                 response.raise_for_status()
@@ -190,7 +203,7 @@ class TranscriptionEngine:
             )
             response = requests.post(
                 f"{OLLAMA_HOST}/api/generate",
-                json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False, "options": {"num_ctx": 8192, "temperature": 0.4}},
+                json={"model": self.ollama_model, "prompt": prompt, "stream": False, "options": {"num_ctx": 8192, "temperature": 0.4}},
                 timeout=600
             )
             response.raise_for_status()
@@ -212,7 +225,7 @@ class TranscriptionEngine:
                 )
                 resp = requests.post(
                     f"{OLLAMA_HOST}/api/generate",
-                    json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False, "options": {"num_ctx": 8192, "temperature": 0.3}},
+                    json={"model": self.ollama_model, "prompt": prompt, "stream": False, "options": {"num_ctx": 8192, "temperature": 0.3}},
                     timeout=600
                 )
                 resp.raise_for_status()
@@ -230,7 +243,7 @@ class TranscriptionEngine:
             
             resp = requests.post(
                 f"{OLLAMA_HOST}/api/generate",
-                json={"model": OLLAMA_MODEL, "prompt": final_prompt, "stream": False, "options": {"num_ctx": 8192, "temperature": 0.4}},
+                json={"model": self.ollama_model, "prompt": final_prompt, "stream": False, "options": {"num_ctx": 8192, "temperature": 0.4}},
                 timeout=600
             )
             resp.raise_for_status()

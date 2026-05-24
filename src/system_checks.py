@@ -11,7 +11,7 @@ def get_total_ram_gb():
     logger.debug(f"Detected System RAM: {total_gb:.2f} GB")
     return total_gb
 
-def check_hardware_safety(model_name: str, operation: str) -> bool:
+def check_hardware_safety(model_name: str, ollama_model_name: str, operation: str) -> bool:
     """
     Checks if the user's hardware is likely capable of running the chosen operation safely.
     Returns (True, "") if safe, or (False, "warning message") if there is a risk.
@@ -26,13 +26,13 @@ def check_hardware_safety(model_name: str, operation: str) -> bool:
         if is_large_model and is_heavy_operation:
             msg = (
                 "⚠️ HARDWARE WARNING\n\n"
-                f"Your system has ~{ram_gb:.1f}GB of RAM. The '{model_name}' model paired with "
-                "local AI Summarization ('Format & Summarize') is extremely resource intensive.\n\n"
+                f"Your system has ~{ram_gb:.1f}GB of RAM. The '{model_name}' Whisper model paired with "
+                f"the '{ollama_model_name}' Ollama model for Summarization ('Format & Summarize') is extremely resource intensive.\n\n"
                 "Attempting this may result in system lag, excessive heat, or crashes. "
-                "It is highly recommended to use a 'base' or 'small' model instead on this machine.\n\n"
+                "It is highly recommended to use a 'base' or 'small' Whisper model instead on this machine.\n\n"
                 "Do you still want to proceed?"
             )
-            logger.warning(f"Hardware warning triggered for 8GB RAM + {model_name} model + {operation}")
+            logger.warning(f"Hardware warning triggered for 8GB RAM + {model_name} + {ollama_model_name} + {operation}")
             return False, msg
         elif is_large_model:
             msg = (
